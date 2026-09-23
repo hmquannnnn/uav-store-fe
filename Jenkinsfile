@@ -100,14 +100,14 @@ pipeline {
                         }
 
                         sh "git clone --branch ${branch} https://\${GIT_USER}:\${GIT_TOKEN}@github.com/${gitopsRepo}.git ${gitopsDir}"
-                        sh "sed -i 's|image: .*${IMAGE_NAME}.*|image: ${img}:${sha}|g' ${gitopsDir}/deployment/k8s/20-frontend.yaml"
+                        sh "sed -i '/repository:.*${IMAGE_NAME}/{n;s/tag:.*/tag: \\"${sha}\\"/}' ${gitopsDir}/helm/uav-store/values.yaml"
 
                         sh """
                             cd ${gitopsDir}
                             git config user.email "jenkins@uav-store"
                             git config user.name "Jenkins"
 
-                            git add deployment/k8s/20-frontend.yaml
+                            git add helm/uav-store/values.yaml
                             git diff --staged --quiet || git commit -m "ci: update frontend image to ${sha} [ci skip]"
 
                             git pull --rebase origin ${branch}
